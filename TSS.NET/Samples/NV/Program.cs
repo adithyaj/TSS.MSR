@@ -153,7 +153,7 @@ namespace NV
                     tpm.Startup(Su.Clear);
                 }
 
-                NVReadOnly();
+                NVReadOnly(tpm);
 
                 //
                 // Clean up.
@@ -187,7 +187,8 @@ namespace NV
             var ownerAuth = new AuthValue();
             TpmHandle nvHandle = TpmHandle.NV(3001);
             AuthValue nvAuth = AuthValue.FromRandom(8);
-            byte[] nvRead = tpm.NvRead(nvHandle, nvHandle, (ushort)nvData.Length, 0);
+            
+            byte[] nvRead = tpm.NvRead(nvHandle, nvHandle, 8, 0);
 
         }
 
