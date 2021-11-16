@@ -25,6 +25,11 @@ namespace NV
         /// </summary>
         private const string DeviceWinTbs = "-tbs";
         /// <summary>
+        /// Defines the argument to use to have this program use a Linux TPM device
+        /// file or TPM access broker to communicate with a TPM 2.0 device.
+        /// </summary>
+        private const string DeviceLinux = "-tpm0";
+        /// <summary>
         /// The default connection to use for communication with the TPM.
         /// </summary>
         private const string DefaultDevice = DeviceSimulator;
@@ -73,6 +78,10 @@ namespace NV
                 {
                     tpmDeviceName = DeviceWinTbs;
                 }
+                else if (string.Compare(arg, DeviceLinux, true) == 0)
+                {
+                    tpmDeviceName = DeviceLinux;
+                }
                 else
                 {
                     return false;
@@ -112,11 +121,12 @@ namespace NV
                     case DeviceSimulator:
                         tpmDevice = new TcpTpmDevice(DefaultSimulatorName, DefaultSimulatorPort);
                         break;
-
                     case DeviceWinTbs:
                         tpmDevice = new TbsDevice();
                         break;
-
+                    case DeviceLinux:
+                        tpmDevice = new LinuxTpmDevice();
+                        break;
                     default:
                         throw new Exception("Unknown device selected.");
                 }
@@ -143,8 +153,7 @@ namespace NV
                     tpm.Startup(Su.Clear);
                 }
 
-                NVReadWrite(tpm);
-                NVCounter(tpm);
+                NVReadOnly();
 
                 //
                 // Clean up.
@@ -159,6 +168,29 @@ namespace NV
             Console.WriteLine("Press Any Key to continue.");
             Console.ReadLine();
         }
+
+
+        /// <summary>
+        /// This sample demonstrates the creation and use of TPM NV-storage
+        /// </summary>
+        /// <param name="tpm">Reference to TPM object.</param>
+        static void NVReadOnly(Tpm2 tpm)
+        {
+            //
+            // AuthValue encapsulates an authorization value: essentially a byte-array.
+            // OwnerAuth is the owner authorization value of the TPM-under-test.  We
+            // assume that it (and other) auths are set to the default (null) value.
+            // If running on a real TPM, which has been provisioned by Windows, this
+            // value will be different. An administrator can retrieve the owner
+            // authorization value from the registry.
+            //
+            var ownerAuth = new AuthValue();
+            TpmHandle nvHandle = TpmHandle.NV(3001);
+            AuthValue nvAuth = AuthValue.FromRandom(8);
+            byte[] nvRead = tpm.NvRead(nvHandle, nvHandle, (ushort)nvData.Length, 0);
+
+        }
+
 
         /// <summary>
         /// This sample demonstrates the creation and use of TPM NV-storage
