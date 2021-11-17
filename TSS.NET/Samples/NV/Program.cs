@@ -184,11 +184,14 @@ namespace NV
             // value will be different. An administrator can retrieve the owner
             // authorization value from the registry.
             //
+            int nvIndex = 3001; // arbitrarely chosen
             var ownerAuth = new AuthValue();
-            TpmHandle nvHandle = TpmHandle.NV(3001);
+            TpmHandle nvHandle = TpmHandle.NV(nvIndex);
             AuthValue nvAuth = AuthValue.FromRandom(8);
-            
-            byte[] nvRead = tpm.NvRead(nvHandle, nvHandle, 8, 0);
+            Console.WriteLine("Reading NVIndex {0}.", nvIndex);
+            byte[] nvRead = tpm[nvAuth].NvRead(nvHandle, nvHandle, (ushort)nvData.Length, 0);
+            Console.WriteLine("Read: {0}", BitConverter.ToString(nvRead));
+
 
         }
 
